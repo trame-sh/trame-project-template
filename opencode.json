@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "trame": {
+      "type": "remote",
+      "url": "https://trame.sh/mcp",
+      "enabled": true
+    }
+  }
+}
