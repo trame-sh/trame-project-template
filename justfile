@@ -16,7 +16,7 @@ start-env NAME="main":
   export LOCAL_UID=$(id -u)
   export LOCAL_GID=$(id -g)
   if [[ {{NAME}} != "main" ]]; then
-    git worktree add -b {{NAME}} ./worktrees/{{NAME}}
+    git worktree add --relative-paths -b {{NAME}} ./worktrees/{{NAME}}
   fi
   docker compose -p {{NAME}} -f docker-compose.env.yml up -d
 
