@@ -1,6 +1,6 @@
 services:
   opencode:
-    build: denv-opencode
+    image: denv-opencode
     environment:
       - LOCAL_UID=$LOCAL_UID
       - LOCAL_GID=$LOCAL_GID

@@ -41,6 +41,9 @@ git clone https://github.com/trame-sh/trame-project-template.git my-project
 cd my-project
 ```
 
+Then edit `AGENTS.md`, `README.md`, and `prompt.md` to your liking.
+You can start by specifying the name of the project you are creating.
+
 ### 2. Configure trame Authentication
 
 Authenticate opencode CLI with trame:
@@ -73,7 +76,8 @@ Launch an interactive shell for hands-on development:
 just start-coord
 ```
 
-This starts a Docker stack (opencode container + postgres) and drops you into a bash shell. From there you can run `just run-agent`, install dependencies, or work manually.
+This starts a Docker stack (opencode container + postgres) and drops you into a bash shell.
+From there you can run `opencode` and start working on specs, features and implementation plans.
 
 To stop the coordinator:
 
@@ -103,3 +107,16 @@ To stop all workers:
 ```bash
 just stop-agents 3
 ```
+
+## Disclaimer
+
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. USE AT YOUR OWN RISK.
+
+This template runs **autonomous AI agents** that can execute code, make API calls, create files, run shell commands, and consume resources (compute, network, storage, and third-party API credits) **for extended periods without human supervision**. By using this software, you acknowledge and agree that:
+
+1. **You are solely responsible** for all costs, resource consumption, and consequences arising from running autonomous agents, including but not limited to API usage fees, cloud compute charges, and any actions the agents take on your behalf.
+2. **You are solely responsible** for reviewing, testing, and validating any code or changes produced by autonomous agents before deploying them to any environment.
+3. The authors and contributors of this project **shall not be held liable** for any direct, indirect, incidental, special, or consequential damages, including but not limited to financial loss, data loss, security vulnerabilities, or service disruptions resulting from the use of this software.
+4. **No guarantee is made** regarding the correctness, safety, or fitness for any particular purpose of code generated or actions performed by autonomous agents.
+
+You should set appropriate spending limits on all API providers and cloud services, monitor running agents regularly, and never run autonomous agents with credentials that have more permissions than strictly necessary.

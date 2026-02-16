@@ -60,4 +60,4 @@ worker-logs ID="1" FOLLOW="":
 
 # Build the denv-opencode image
 denv-build:
-  docker build {{justfile_dir()}}/denv
+  docker build {{justfile_dir()}}/denv -t denv-opencode --no-cache
