@@ -1,3 +1,3 @@
 - specs of project, features and implementation plans are available on trame mcp tool
-- you are running in the following docker compose stack: denv/docker-compose.env.yml
+- you are running in a docker compose stack based on denv/docker-compose.base.yml (coord or worker)
 - you are working in a git worktree. In case of worktree issues, first try `cd /workspace && git worktree repair`
