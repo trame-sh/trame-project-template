@@ -43,13 +43,18 @@ start-agents N="1":
   echo "[start-agents] started {{N}} worker(s)"
 
 # Stop all worker agents
-stop-agents N="1":
+stop-agents:
   #!/usr/bin/env bash
-  for i in $(seq 1 {{N}}); do
-    echo "[stop-agents] stopping worker-$i"
-    docker compose -p "worker-$i" -f denv/docker-compose.worker.yml down
+  workers=$(docker compose ls --format json | grep -o '"worker-[0-9]*"' | tr -d '"')
+  if [ -z "$workers" ]; then
+    echo "[stop-agents] no workers running"
+    exit 0
+  fi
+  for project in $workers; do
+    echo "[stop-agents] stopping $project"
+    docker compose -p "$project" -f denv/docker-compose.worker.yml down
   done
-  echo "[stop-agents] stopped {{N}} worker(s)"
+  echo "[stop-agents] all workers stopped"
 
 # Show logs for a specific worker
 worker-logs ID="1" FOLLOW="":

@@ -105,7 +105,7 @@ just worker-logs 2 -f    # follow
 To stop all workers:
 
 ```bash
-just stop-agents 3
+just stop-agents
 ```
 
 ## Disclaimer
