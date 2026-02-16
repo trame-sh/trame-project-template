@@ -39,6 +39,7 @@ Click "Use this template" on GitHub or clone the repository:
 ```bash
 git clone https://github.com/trame-sh/trame-project-template.git my-project
 cd my-project
+just denv-build # To build the agent image we are using here
 ```
 
 Then edit `AGENTS.md`, `README.md`, and `prompt.md` to your liking.
@@ -87,26 +88,22 @@ just stop-coord
 
 ### 5. Start Autonomous Workers
 
-Spin up N isolated workers that each claim and work on implementation plans automatically:
+Start a single worker in the foreground (Ctrl-C to stop and clean up):
+
+```bash
+just new-agent
+```
+
+Or spin up N workers in the background:
 
 ```bash
 just start-agents 3
+just worker-logs 2       # view logs for worker-2
+just worker-logs 2 -f    # follow logs
+just stop-agents          # stop all background workers
 ```
 
 Each worker gets its own Docker stack (container + postgres). They auto-run the agent loop, claim plans from trame, create worktrees, and start implementing.
-
-View logs for a specific worker:
-
-```bash
-just worker-logs 2
-just worker-logs 2 -f    # follow
-```
-
-To stop all workers:
-
-```bash
-just stop-agents
-```
 
 ## Disclaimer
 

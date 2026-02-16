@@ -31,7 +31,19 @@ start-coord:
 stop-coord:
   docker compose -p coord -f denv/docker-compose.coord.yml down
 
-# Start N autonomous worker agents (each in its own isolated stack)
+# Start a single worker agent in the foreground (Ctrl-C to stop)
+new-agent:
+  #!/usr/bin/env bash
+  export LOCAL_UID=$(id -u)
+  export LOCAL_GID=$(id -g)
+  last=$(docker compose ls --format json | grep -o '"worker-[0-9]*"' | tr -d '"' | sed 's/worker-//' | sort -n | tail -1)
+  id=$((${last:-0} + 1))
+  project="worker-$id"
+  echo "[new-agent] starting $project (Ctrl-C to stop)"
+  trap "echo '[new-agent] stopping $project'; docker compose -p $project -f denv/docker-compose.worker.yml down" EXIT
+  docker compose -p "$project" -f denv/docker-compose.worker.yml up --build
+
+# Start N autonomous worker agents in the background
 start-agents N="1":
   #!/usr/bin/env bash
   export LOCAL_UID=$(id -u)
