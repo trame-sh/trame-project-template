@@ -8,7 +8,20 @@ install:
 
 # Run autonomous agent
 run-agent:
-  while :; do cat prompt.md | opencode -m anthropic/claude-sonnet-4-5 run; done
+  #!/usr/bin/env bash
+  SIGNALS_DIR="${AGENT_SIGNALS_DIR:-/tmp/agent-signals}"
+  mkdir -p "$SIGNALS_DIR"
+  while :; do
+    cat prompt.md | opencode -m anthropic/claude-sonnet-4-5 run || {
+      echo "[run-agent] opencode exited with code $? — aborting"
+      exit 1
+    }
+    if [ -f "$SIGNALS_DIR/no-plan" ]; then
+      rm -f "$SIGNALS_DIR/no-plan"
+      echo "[run-agent] no plans available — sleeping 5 minutes"
+      sleep 300
+    fi
+  done
 
 # Create a worktree for a feature branch, and start a development environment for it
 start-env NAME="main":
