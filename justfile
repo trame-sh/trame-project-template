@@ -3,12 +3,29 @@ default:
     @just --list
 
 # Run autonomous agent
-run-agent:
+run-agent *args:
   #!/usr/bin/env bash
+  # Start with env var or default, allow CLI override
+  MODEL="${MODEL:-anthropic/claude-sonnet-4-5}"
+  # Parse arguments to allow override
+  args="{{args}}"
+  set -- $args
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      -m|--model)
+        MODEL="$2"
+        shift 2
+        ;;
+      *)
+        shift
+        ;;
+    esac
+  done
   SIGNALS_DIR="${AGENT_SIGNALS_DIR:-/tmp/agent-signals}"
   mkdir -p "$SIGNALS_DIR"
+  echo "[run-agent] using model: $MODEL"
   while :; do
-    cat prompt.md | opencode -m anthropic/claude-sonnet-4-5 run || {
+    cat prompt.md | opencode -m "$MODEL" run || {
       echo "[run-agent] opencode exited with code $? — aborting"
       exit 1
     }
@@ -32,22 +49,55 @@ stop-coord:
   docker compose -p coord -f denv/docker-compose.coord.yml down
 
 # Start a single worker agent in the foreground (Ctrl-C to stop)
-new-agent:
+new-agent *args:
   #!/usr/bin/env bash
+  MODEL="anthropic/claude-sonnet-4-5"
+  # Parse arguments
+  args="{{args}}"
+  set -- $args
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      -m|--model)
+        MODEL="$2"
+        shift 2
+        ;;
+      *)
+        shift
+        ;;
+    esac
+  done
+  export MODEL
   export LOCAL_UID=$(id -u)
   export LOCAL_GID=$(id -g)
   last=$(docker compose ls --format json | grep -o '"worker-[0-9]*"' | tr -d '"' | sed 's/worker-//' | sort -n | tail -1)
   id=$((${last:-0} + 1))
   project="worker-$id"
-  echo "[new-agent] starting $project (Ctrl-C to stop)"
+  echo "[new-agent] starting $project with model $MODEL (Ctrl-C to stop)"
   trap "echo '[new-agent] stopping $project'; docker compose -p $project -f denv/docker-compose.worker.yml down" EXIT
   docker compose -p "$project" -f denv/docker-compose.worker.yml up --build
 
 # Start N autonomous worker agents in the background
-start-agents N="1":
+start-agents N="1" *args:
   #!/usr/bin/env bash
+  MODEL="anthropic/claude-sonnet-4-5"
+  # Parse arguments
+  args="{{args}}"
+  set -- $args
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      -m|--model)
+        MODEL="$2"
+        shift 2
+        ;;
+      *)
+        shift
+        ;;
+    esac
+  done
+  export MODEL
   export LOCAL_UID=$(id -u)
   export LOCAL_GID=$(id -g)
+  echo "[start-agents] starting {{N}} worker(s) with model $MODEL"
   for i in $(seq 1 {{N}}); do
     echo "[start-agents] starting worker-$i"
     docker compose -p "worker-$i" -f denv/docker-compose.worker.yml up -d
