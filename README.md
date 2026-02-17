@@ -2,6 +2,12 @@
 
 > Isolated development environments using git worktrees + docker compose for specs-driven agentic development
 
+Agentic CLI, opencode in this case, is running inside a docker container.  
+A full docker compose stack is started with it to provide external services, like a Postgresql database in this case.  
+The docker image comes with opencode, node, pnpm, and the rust toolchain.
+
+Edit both the Dockerfile and the Compose stacks in denv/ to adapt them to your project need.
+
 This repository contains:
 
 ```
@@ -24,11 +30,9 @@ This repository contains:
 
 Before using this template, ensure you have:
 
-- **Git** 2.35 or higher (for worktree support)
 - **Docker** and **Docker Compose**
 - **just** - Command runner ([installation guide](https://github.com/casey/just#installation))
-- **opencode CLI** - AI agent interface ([installation guide](https://opencode.ai/docs/installation))
-- **trame account** - Sign up at [trame.sh](https://trame.sh)
+- **Optional: a trame account** - To use the coordinator / workers workflow. Sign up at [trame.sh](https://trame.sh)
 
 ## Quick Start
 
