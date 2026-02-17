@@ -4,19 +4,20 @@ set -e
 USER_ID=${LOCAL_UID:-1000}
 GROUP_ID=${LOCAL_GID:-1000}
 
-# Create group and user matching host IDs
-groupadd -g "$GROUP_ID" -o dev 2>/dev/null || true
-useradd -m -u "$USER_ID" -g "$GROUP_ID" -o -s /bin/bash dev 2>/dev/null || true
+# Reuse the existing 'node' user from the base image.
+# Update its UID/GID to match the host so file ownership is correct.
+groupmod -g "$GROUP_ID" -o node 2>/dev/null || true
+usermod -u "$USER_ID" -g "$GROUP_ID" -o node 2>/dev/null || true
 
-export HOME=/home/dev
+export HOME=/home/node
 
-# Copy Rust toolchain from root into the dynamic user's home
+# Copy Rust toolchain from root into the user's home
 if [ -d /root/.cargo ] && [ ! -d "$HOME/.cargo" ]; then
   cp -r /root/.cargo "$HOME/.cargo"
   cp -r /root/.rustup "$HOME/.rustup"
 fi
 
-# Ensure the dynamic user owns their home directory
+# Ensure the user owns their home directory
 chown -R "$USER_ID":"$GROUP_ID" "$HOME"
 
 # Ensure the agent signals directory is writable
@@ -25,5 +26,5 @@ if [ -n "$AGENT_SIGNALS_DIR" ]; then
   chown "$USER_ID":"$GROUP_ID" "$AGENT_SIGNALS_DIR"
 fi
 
-# Execute as the dynamic user
-exec gosu dev env HOME="$HOME" "$@"
+# Execute as the node user
+exec gosu node env HOME="$HOME" "$@"
