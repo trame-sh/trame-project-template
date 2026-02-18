@@ -8,6 +8,8 @@ services:
       - DATABASE_URL=postgresql://postgres:testpass@postgres:5432/trame_test # [ADAPT] Project DB connection.
       - AGENT_SIGNALS_DIR=/tmp/agent-signals # [KEEP] Used by agent signal mechanism.
       - MODEL=${MODEL:-anthropic/claude-sonnet-4-5} # [ADAPT] Default model for agent CLI.
+      - TRAME_AGENT_ID=${TRAME_AGENT_ID:-}       # [KEEP] Agent identity for trame session tracking.
+      - TRAME_AGENT_LABEL=${TRAME_AGENT_LABEL:-}  # [KEEP] Human-readable agent label.
     volumes:
       - ../:/workspace                    # [KEEP] Mounts project root into container.
       # [ADAPT] Agent CLI config volumes — replace with your CLI's config/data/state paths.
