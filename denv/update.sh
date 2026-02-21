@@ -15,6 +15,6 @@ BASE="https://raw.githubusercontent.com/$REPO/$VERSION/tools"
 curl -fsSL "$BASE/mcp.sh" -o "$SCRIPT_DIR/mcp.sh"
 chmod +x "$SCRIPT_DIR/mcp.sh"
 
-curl -fsSL "$BASE/AGENTS.md" -o "$PROJECT_DIR/AGENTS.md"
+curl -fsSL "$BASE/AGENTS.md" -o "$SCRIPT_DIR/AGENTS.md"
 
 echo "Updated to $REPO@$VERSION"
