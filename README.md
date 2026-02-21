@@ -1,116 +1,99 @@
 # trame Project Template
 
-> Isolated development environments using git worktrees + docker compose for specs-driven agentic development
+> Claude Code on host, dev environment via MCP, isolated worktrees for parallel agents
 
-Agentic CLI, opencode in this case, is running inside a docker container.  
-A full docker compose stack is started with it to provide external services, like a Postgresql database in this case.  
-The docker image comes with opencode, node, pnpm, and the rust toolchain.
+GitHub template for projects using [trame-tools](https://github.com/trame-sh/trame-tools) as their dev environment base image. All Claude Code processes run on the host machine. The Docker container is purely a dev environment (tools + services) accessed via an MCP server.
 
-Edit both the Dockerfile and the Compose stacks in denv/ to adapt them to your project need.
+```
+Host Machine                         Docker Compose Stacks
 
-This repository contains:
+┌─────────────────────┐              ┌─────────────────────┐
+│ Coordinator          │──MCP───────▶│ project-coord       │
+│ claude (interactive) │              │ devenv + postgres    │
+└─────────────────────┘              └─────────────────────┘
+
+┌─────────────────────┐              ┌─────────────────────┐
+│ Worker 1             │──MCP───────▶│ project-worker-1    │
+│ claude -p (headless) │              │ devenv + postgres    │
+└─────────────────────┘              └─────────────────────┘
+```
+
+## Project Structure
 
 ```
 .
 ├── denv/
-│   ├── Dockerfile                # opencode in container
-│   ├── entrypoint.sh             # entrypoint for Dockerfile
+│   ├── Dockerfile                # FROM trame-tools + project layers
+│   ├── mcp.sh                    # MCP launcher (auto-starts compose stack)
 │   ├── docker-compose.base.yml   # shared service definitions
-│   ├── docker-compose.coord.yml  # coordinator (interactive bash)
-│   └── docker-compose.worker.yml # worker (autonomous agent loop)
-├── .gitignore                    # ignoring worktrees/ folder
-├── AGENTS.md                     # basic guidance for working in this environment
-├── README.md                     # this file
-├── justfile                      # our command runner
-├── opencode.json                 # barebone opencode configuration with trame.sh mcp
-└── prompt.md                     # a basic prompt.md used by our run-agent loop
+│   ├── docker-compose.coord.yml  # coordinator stack
+│   ├── AGENTS.md                 # dev environment rules (from trame-tools)
+│   └── update.sh                 # pulls latest mcp.sh + AGENTS.md from trame-tools
+├── .mcp.json                     # Claude Code MCP config
+├── CLAUDE.md                     # dev environment rules + project-specific instructions
+└── AGENTS.md                     # references denv/AGENTS.md + project-specific agent instructions
 ```
 
 ## Prerequisites
 
-Before using this template, ensure you have:
-
+- **Claude Code** on host ([installation guide](https://docs.anthropic.com/en/docs/claude-code/overview))
 - **Docker** and **Docker Compose**
-- **just** - Command runner ([installation guide](https://github.com/casey/just#installation))
-- **Optional: a trame account** - To use the coordinator / workers workflow. Sign up at [trame.sh](https://trame.sh)
+- **Optional: a trame account** — for coordinator/workers workflow. Sign up at [trame.sh](https://trame.sh)
 
 ## Quick Start
 
 ### 1. Use This Template
 
-Click "Use this template" on GitHub or clone the repository:
+Click **"Use this template"** on GitHub, or clone and remove the `.git` directory:
 
 ```bash
-git clone https://github.com/trame-sh/trame-project-template.git my-project
-cd my-project
-just denv-build # To build the agent image we are using here
+git clone https://github.com/trame-sh/trame-project-template myproject
+cd myproject
+rm -rf .git && git init
 ```
 
-Then edit `AGENTS.md`, `README.md`, and `prompt.md` to your liking.
-You can start by specifying the name of the project you are creating.
+### 2. Customize
 
-> **AI agents:** See [`TEMPLATE.md`](TEMPLATE.md) for a structured guide on adapting this
-> template to a specific project, including file-by-file instructions and agent CLI alternatives.
+- Edit `denv/Dockerfile` — uncomment optional layers (pnpm, Rust) or add your own
+- Edit `denv/docker-compose.base.yml` — adjust services, DB names, credentials
+- Edit `CLAUDE.md` — add project-specific instructions
 
-### 2. Configure trame Authentication
-
-Authenticate opencode CLI with trame:
+### 3. Build the Dev Environment Image
 
 ```bash
-opencode mcp auth trame
+docker build denv/ -t $(basename "$PWD")-denv
 ```
 
-This will:
+### 4. Start Claude Code
 
-1. Open your browser for OAuth authentication
-2. Connect your opencode CLI to trame platform
-3. Store credentials in `~/.config/opencode`
-
-**Note:** The `opencode.json` file in this template is already configured to connect to `https://trame.sh/mcp`.
-
-### 3. Create Your First Project in trame
-
-Create a project on [trame.sh](https://trame.sh) or via the opencode CLI:
+Simply run `claude` from the project root. The MCP server auto-starts the compose stack:
 
 ```bash
-echo "Create a new project called '<your-project>' with a description of what you're building" | opencode run
+claude
 ```
 
-### 4. Start the Coordinator
+The `shell_exec` MCP tool runs commands in the dev container. File reads/writes happen directly on the host.
 
-Launch an interactive shell for hands-on development:
+### 5. Stop the Dev Environment
 
 ```bash
-just start-coord
+docker compose -p "$(basename "$PWD")-coord" -f denv/docker-compose.coord.yml down
 ```
 
-This starts a Docker stack (opencode container + postgres) and drops you into a bash shell.
-From there you can run `opencode` and start working on specs, features and implementation plans.
+## Updating trame-tools
 
-To stop the coordinator:
+Pull the latest host-side files (`mcp.sh`, `AGENTS.md`) from trame-tools:
 
 ```bash
-just stop-coord
+denv/update.sh          # latest release
+denv/update.sh v1.2.0   # specific version
 ```
 
-### 5. Start Autonomous Workers
-
-Start a single worker in the foreground (Ctrl-C to stop and clean up):
+To update the base Docker image, rebuild:
 
 ```bash
-just new-agent
+docker build denv/ -t $(basename "$PWD")-denv --pull
 ```
-
-Or spin up N workers in the background:
-
-```bash
-just start-agents 3
-just worker-logs 2       # view logs for worker-2
-just worker-logs 2 -f    # follow logs
-just stop-agents          # stop all background workers
-```
-
-Each worker gets its own Docker stack (container + postgres). They auto-run the agent loop, claim plans from trame, create worktrees, and start implementing.
 
 ## Disclaimer
 

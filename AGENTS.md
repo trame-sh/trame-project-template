@@ -1,3 +1,3 @@
-- specs of project, features and implementation plans are available on trame mcp tool
-- you are running in a docker compose stack based on denv/docker-compose.base.yml (coord or worker)
-- you are working in a git worktree. In case of worktree issues, first try `cd /workspace && git worktree repair`
+See [denv/AGENTS.md](denv/AGENTS.md) for dev environment rules. If missing, run `denv/update.sh` to pull it from trame-tools.
+
+<!-- Add project-specific agent instructions below -->
