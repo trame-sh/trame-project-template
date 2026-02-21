@@ -2,7 +2,7 @@
 
 > Claude Code on host, dev environment via MCP, isolated worktrees for parallel agents
 
-All Claude Code processes run on the host machine. The Docker container is purely a dev environment (tools + services) accessed via an MCP server. Each worker gets its own compose stack and git worktree for full isolation.
+GitHub template for projects using [trame-tools](https://github.com/trame-sh/trame-tools) as their dev environment base image. All Claude Code processes run on the host machine. The Docker container is purely a dev environment (tools + services) accessed via an MCP server.
 
 ```
 Host Machine                         Docker Compose Stacks
@@ -23,12 +23,11 @@ Host Machine                         Docker Compose Stacks
 ```
 .
 ├── denv/
-│   ├── Dockerfile                # dev environment image (no agent CLI)
-│   ├── entrypoint.sh             # UID/GID mapping entrypoint
-│   ├── mcp-server.mjs            # MCP server exposing shell_exec
+│   ├── Dockerfile                # FROM trame-tools + project layers
 │   ├── mcp.sh                    # MCP launcher (auto-starts compose stack)
 │   ├── docker-compose.base.yml   # shared service definitions
-│   └── docker-compose.coord.yml  # coordinator stack
+│   ├── docker-compose.coord.yml  # coordinator stack
+│   └── update.sh                 # pulls latest mcp.sh + AGENTS.md from trame-tools
 ├── .mcp.json                     # Claude Code MCP config
 ├── CLAUDE.md                     # Claude Code instructions
 └── AGENTS.md                     # agent guidance
@@ -42,13 +41,29 @@ Host Machine                         Docker Compose Stacks
 
 ## Quick Start
 
-### 1. Build the Dev Environment Image
+### 1. Use This Template
+
+Click **"Use this template"** on GitHub, or clone and remove the `.git` directory:
 
 ```bash
-docker build denv/ -t $(basename "$PWD")-denv --no-cache
+git clone https://github.com/trame-sh/trame-project-template myproject
+cd myproject
+rm -rf .git && git init
 ```
 
-### 2. Start the Coordinator
+### 2. Customize
+
+- Edit `denv/Dockerfile` — uncomment optional layers (pnpm, Rust) or add your own
+- Edit `denv/docker-compose.base.yml` — adjust services, DB names, credentials
+- Edit `CLAUDE.md` — add project-specific instructions
+
+### 3. Build the Dev Environment Image
+
+```bash
+docker build denv/ -t $(basename "$PWD")-denv
+```
+
+### 4. Start Claude Code
 
 Simply run `claude` from the project root. The MCP server auto-starts the compose stack:
 
@@ -58,10 +73,25 @@ claude
 
 The `shell_exec` MCP tool runs commands in the dev container. File reads/writes happen directly on the host.
 
-### 3. Stop the Dev Environment
+### 5. Stop the Dev Environment
 
 ```bash
 docker compose -p "$(basename "$PWD")-coord" -f denv/docker-compose.coord.yml down
+```
+
+## Updating trame-tools
+
+Pull the latest host-side files (`mcp.sh`, `AGENTS.md`) from trame-tools:
+
+```bash
+denv/update.sh          # latest release
+denv/update.sh v1.2.0   # specific version
+```
+
+To update the base Docker image, rebuild:
+
+```bash
+docker build denv/ -t $(basename "$PWD")-denv --pull
 ```
 
 ## Disclaimer

@@ -4,7 +4,7 @@ services:
     environment:
       - LOCAL_UID=$LOCAL_UID
       - LOCAL_GID=$LOCAL_GID
-      - DATABASE_URL=postgresql://postgres:testpass@postgres:5432/trame_test # [ADAPT] Project DB connection.
+      - DATABASE_URL=postgresql://postgres:testpass@postgres:5432/myproject # [ADAPT] Project DB connection.
     volumes:
       - ../:/workspace                    # [KEEP] Mounts project root into container.
     depends_on: # [ADAPT] List companion services the project needs.
@@ -17,9 +17,9 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: testpass
-      POSTGRES_DB: trame_test
+      POSTGRES_DB: myproject
     volumes:
-      - postgres_test_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -27,5 +27,5 @@ services:
       retries: 5
 
 volumes:
-  postgres_test_data:
+  postgres_data:
     driver: local
