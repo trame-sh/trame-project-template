@@ -3,3 +3,6 @@ worktrees/
 
 # Claude Code
 .claude/
+
+# trame-tools local version tracking
+denv/.trame-tools-version
