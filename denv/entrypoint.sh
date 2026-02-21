@@ -14,11 +14,5 @@ export HOME=/home/node
 # Ensure the user owns their home directory
 chown -R "$USER_ID":"$GROUP_ID" "$HOME"
 
-# Ensure the agent signals directory is writable
-if [ -n "$AGENT_SIGNALS_DIR" ]; then
-  mkdir -p "$AGENT_SIGNALS_DIR"
-  chown "$USER_ID":"$GROUP_ID" "$AGENT_SIGNALS_DIR"
-fi
-
 # Execute as the node user
 exec gosu node env HOME="$HOME" "$@"

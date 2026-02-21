@@ -1,2 +1,5 @@
 # Worktrees
 worktrees/
+
+# Claude Code
+.claude/

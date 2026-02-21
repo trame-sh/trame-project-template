@@ -38,14 +38,11 @@ RUN cd /tmp \
 # [OPTIONAL: node] pnpm package manager — remove if not using Node.js.
 RUN curl -fsSL https://get.pnpm.io/install.sh | SHELL="$(which bash)" bash -
 
-# [REQUIRED] just command runner — used by the agent loop and all recipes.
-RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
-
-# [AGENT-CLI] Install opencode. Replace this block when using a different agent CLI.
-RUN cd /tmp \
-    && curl -sL https://github.com/anomalyco/opencode/releases/latest/download/opencode-linux-x64.tar.gz | tar xz \
-    && mv opencode /usr/local/bin \
-    && rm -rf /tmp/opencode-linux-x64.tar.gz
+# [REQUIRED] MCP server — provides shell_exec tool for Claude Code on the host.
+RUN npm install -g @modelcontextprotocol/sdk zod
+COPY mcp-server.mjs /usr/local/lib/mcp-server.mjs
+RUN printf '#!/bin/sh\nexec node /usr/local/lib/mcp-server.mjs "$@"\n' > /usr/local/bin/mcp-server \
+    && chmod +x /usr/local/bin/mcp-server
 
 # [OPTIONAL: rust] Rust toolchain — remove if project doesn't use Rust.
 RUN curl -sSf https://sh.rustup.rs --output rustup-init && \
