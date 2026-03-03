@@ -1,24 +1,21 @@
 # trame Project Template
 
-> Isolated development environments using git worktrees + docker compose for specs-driver agentic development
-
-This template provides a streamlined setup for developing projects with [trame.sh](https://trame.sh). It leverages git worktrees to create isolated development environments where AI agents can work autonomously on features while fetching specifications from trame.sh via the Model Context Protocol (MCP).
-
-## Overview
+> Isolated development environments using git worktrees + docker compose for specs-driven agentic development
 
 This repository contains:
 
 ```
-/
-- denv/
--- Dockerfile # opencode in container
--- entrypoint.sh # entrypoint for Dockerfile
--- docker-compose.env.yml # simple isolated development stack
-- opencode.json # barebone opencode configuration with trame.sh mcp
-- justfile # our command runner
-- .gitignore # ignoring worktrees/ folder, where we create our isolated environments
-- prompt.md # a basic prompt.md used by our run-agent loop
-- AGENTS.md # a small AGENTS.md with basic guidance for working in this environment
+.
+├── denv/
+│   ├── Dockerfile              # opencode in container
+│   ├── entrypoint.sh           # entrypoint for Dockerfile
+│   └── docker-compose.env.yml  # simple isolated development stack
+├── .gitignore                  # ignoring worktrees/ folder
+├── AGENTS.md                   # basic guidance for working in this environment
+├── README.md                   # this file
+├── justfile                    # our command runner
+├── opencode.json               # barebone opencode configuration with trame.sh mcp
+└── prompt.md                   # a basic prompt.md used by our run-agent loop
 ```
 
 ## Prerequisites
@@ -60,10 +57,10 @@ This will:
 
 ### 3. Create Your First Project in trame
 
-Using the opencode CLI with trame MCP tools:
+Create a project on [trame.sh](https://trame.sh) or via the opencode CLI:
 
 ```bash
-echo "Create a new project called 'my-project' for building a task management API" | opencode run
+echo "Create a new project called '<your-project>' with a description of what you're building" | opencode run
 ```
 
 ### 4. Create Your First Worktree Environment
@@ -97,28 +94,18 @@ You can now:
 - Install dependencies: `just install`
 - Run tests, build, etc.
 
-The agent will:
-
-1. Fetch project specs from trame
-2. Request or use an assigned implementation plan
-3. Write tests first (TDD approach)
-4. Implement the feature
-5. Update `plan.md` with progress
-6. Commit changes when tests pass
-
 ### 6. Stop the Environment
 
-When done with the feature:
+From the worktree directory:
 
 ```bash
-cd worktrees/feature-auth
 just stop-env
 ```
 
-This stops and removes the Docker containers for this worktree. The worktree directory and your code remain intact.
+This stops and removes the Docker containers. The worktree directory and your code remain intact.
 
 ### 7. Clean Up the Worktree
 
 ```bash
-git delete-env feature-auth
+just delete-env feature-auth
 ```
