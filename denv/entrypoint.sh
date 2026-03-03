@@ -11,12 +11,6 @@ usermod -u "$USER_ID" -g "$GROUP_ID" -o node 2>/dev/null || true
 
 export HOME=/home/node
 
-# Copy Rust toolchain from root into the user's home
-if [ -d /root/.cargo ] && [ ! -d "$HOME/.cargo" ]; then
-  cp -r /root/.cargo "$HOME/.cargo"
-  cp -r /root/.rustup "$HOME/.rustup"
-fi
-
 # Ensure the user owns their home directory
 chown -R "$USER_ID":"$GROUP_ID" "$HOME"
 

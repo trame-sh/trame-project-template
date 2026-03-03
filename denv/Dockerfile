@@ -2,7 +2,10 @@ FROM node:25-trixie-slim
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
-    PATH="/root/.cargo/bin:/root/.local/bin:${PATH}"
+    PATH="/usr/local/cargo/bin:/usr/local/share/pnpm:/usr/local/bin:${PATH}" \
+    PNPM_HOME=/usr/local/share/pnpm \
+    RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo
 
 # Install system dependencies + gosu for entrypoint user switching
 RUN apt-get update && apt-get install -y \
@@ -29,13 +32,21 @@ RUN cd /tmp \
     && make prefix=/usr install \
     && cd / && rm -rf /tmp/git-2.48.1
 
-RUN npm i -g opencode-ai
-RUN npm i -g pnpm@latest-10
-RUN npm install -g rust-just
+# Install pnpm via standalone script to system location
+RUN curl -fsSL https://get.pnpm.io/install.sh | SHELL="$(which bash)" bash -
 
-# Install Rust toolchain (into /root; entrypoint copies it to the dynamic user)
+# Install just via pre-built binary
+RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
+
+# Install opencode from github releases
+RUN cd /tmp \
+    && curl -sL https://github.com/anomalyco/opencode/releases/latest/download/opencode-linux-x64.tar.gz | tar xz \
+    && mv opencode /usr/local/bin \
+    && rm -rf /tmp/opencode-linux-x64.tar.gz
+
+# Install Rust toolchain to system location
 RUN curl -sSf https://sh.rustup.rs --output rustup-init && \
-    sh rustup-init -y && \
+    sh rustup-init -y --default-toolchain stable && \
     rm rustup-init && \
     rustup component add rustfmt clippy
 
