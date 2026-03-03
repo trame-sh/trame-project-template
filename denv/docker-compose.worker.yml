@@ -1,0 +1,23 @@
+services:
+  devenv:
+    extends:
+      file: docker-compose.base.yml
+      service: devenv
+    command: ["bash", "/workspace/denv/agent-loop.sh"]
+    environment:
+      - MODEL
+      - AGENT_LABEL
+      - TRAME_AGENT_ID
+    volumes:
+      - ~/.claude:/home/node/.claude
+      - ~/.claude.json:/home/node/.claude.json
+    restart: on-failure:3
+
+  postgres:
+    extends:
+      file: docker-compose.base.yml
+      service: postgres
+
+volumes:
+  postgres_data:
+    driver: local
