@@ -83,7 +83,8 @@ new-agent *args:
   compose_project="${prefix}-${id}"
   echo "[new-agent] starting $compose_project with model $MODEL (Ctrl-C to stop)"
   trap "echo '[new-agent] stopping $compose_project'; docker compose -p $compose_project -f denv/docker-compose.worker.yml down" EXIT
-  docker compose -p "$compose_project" -f denv/docker-compose.worker.yml up --build
+  docker compose -p "$compose_project" -f denv/docker-compose.worker.yml up -d --build
+  docker compose -p "$compose_project" -f denv/docker-compose.worker.yml logs -f opencode
 
 # Start N autonomous worker agents in the background
 start-agents N="1" *args:
