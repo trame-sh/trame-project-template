@@ -49,6 +49,9 @@ just denv-build # To build the agent image we are using here
 Then edit `AGENTS.md`, `README.md`, and `prompt.md` to your liking.
 You can start by specifying the name of the project you are creating.
 
+> **AI agents:** See [`TEMPLATE.md`](TEMPLATE.md) for a structured guide on adapting this
+> template to a specific project, including file-by-file instructions and agent CLI alternatives.
+
 ### 2. Configure trame Authentication
 
 Authenticate opencode CLI with trame:

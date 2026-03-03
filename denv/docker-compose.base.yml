@@ -1,22 +1,28 @@
 services:
+  # [ADAPT] Rename this service if using a different agent CLI.
   opencode:
-    image: ${DENV_IMAGE:-denv-opencode}
+    image: ${DENV_IMAGE:-denv-opencode} # [KEEP] Set via justfile recipes.
     environment:
-      - LOCAL_UID=$LOCAL_UID
-      - LOCAL_GID=$LOCAL_GID
-      - DATABASE_URL=postgresql://postgres:testpass@postgres:5432/trame_test
-      - AGENT_SIGNALS_DIR=/tmp/agent-signals
-      - MODEL=${MODEL:-anthropic/claude-sonnet-4-5}
+      - LOCAL_UID=$LOCAL_UID              # [KEEP] Used by entrypoint.sh for UID mapping.
+      - LOCAL_GID=$LOCAL_GID              # [KEEP] Used by entrypoint.sh for GID mapping.
+      - DATABASE_URL=postgresql://postgres:testpass@postgres:5432/trame_test # [ADAPT] Project DB connection.
+      - AGENT_SIGNALS_DIR=/tmp/agent-signals # [KEEP] Used by agent signal mechanism.
+      - MODEL=${MODEL:-anthropic/claude-sonnet-4-5} # [ADAPT] Default model for agent CLI.
     volumes:
-      - ../:/workspace
+      - ../:/workspace                    # [KEEP] Mounts project root into container.
+      # [ADAPT] Agent CLI config volumes — replace with your CLI's config/data/state paths.
+      # These map host directories into the container so credentials persist across restarts.
+      # Example for Claude Code: ~/.claude:/home/node/.claude
       - ~/.config/opencode:/home/node/.config/opencode
       - ~/.local/share/opencode:/home/node/.local/share/opencode
       - ~/.local/state/opencode:/home/node/.local/state/opencode
-      - agent_signals:/tmp/agent-signals
-    depends_on:
+      - agent_signals:/tmp/agent-signals  # [KEEP] Inter-agent signaling volume.
+    depends_on: # [ADAPT] List companion services the project needs.
       postgres:
         condition: service_healthy
 
+  # [ADAPT] Companion services — add, remove, or modify based on project needs.
+  # See TEMPLATE.md for examples (Redis, MongoDB, MySQL, etc.).
   postgres:
     image: postgres:15-alpine
     environment:
@@ -34,5 +40,5 @@ services:
 volumes:
   postgres_test_data:
     driver: local
-  agent_signals:
+  agent_signals: # [KEEP] Used by agent signal mechanism.
     driver: local
