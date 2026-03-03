@@ -1,10 +1,9 @@
 services:
-  opencode:
+  devenv:
     extends:
       file: docker-compose.base.yml
-      service: opencode
-    stdin_open: true
-    tty: true
+      service: devenv
+    command: ["sleep", "infinity"]
 
   postgres:
     extends:
@@ -13,6 +12,4 @@ services:
 
 volumes:
   postgres_test_data:
-    driver: local
-  agent_signals:
     driver: local
