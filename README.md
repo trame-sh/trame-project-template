@@ -27,10 +27,11 @@ Host Machine                         Docker Compose Stacks
 │   ├── mcp.sh                    # MCP launcher (auto-starts compose stack)
 │   ├── docker-compose.base.yml   # shared service definitions
 │   ├── docker-compose.coord.yml  # coordinator stack
+│   ├── AGENTS.md                 # dev environment rules (from trame-tools)
 │   └── update.sh                 # pulls latest mcp.sh + AGENTS.md from trame-tools
 ├── .mcp.json                     # Claude Code MCP config
-├── CLAUDE.md                     # Claude Code instructions
-└── AGENTS.md                     # agent guidance
+├── CLAUDE.md                     # dev environment rules + project-specific instructions
+└── AGENTS.md                     # references denv/AGENTS.md + project-specific agent instructions
 ```
 
 ## Prerequisites
