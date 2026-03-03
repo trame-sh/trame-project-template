@@ -7,15 +7,17 @@ This repository contains:
 ```
 .
 ├── denv/
-│   ├── Dockerfile              # opencode in container
-│   ├── entrypoint.sh           # entrypoint for Dockerfile
-│   └── docker-compose.env.yml  # simple isolated development stack
-├── .gitignore                  # ignoring worktrees/ folder
-├── AGENTS.md                   # basic guidance for working in this environment
-├── README.md                   # this file
-├── justfile                    # our command runner
-├── opencode.json               # barebone opencode configuration with trame.sh mcp
-└── prompt.md                   # a basic prompt.md used by our run-agent loop
+│   ├── Dockerfile                # opencode in container
+│   ├── entrypoint.sh             # entrypoint for Dockerfile
+│   ├── docker-compose.base.yml   # shared service definitions
+│   ├── docker-compose.coord.yml  # coordinator (interactive bash)
+│   └── docker-compose.worker.yml # worker (autonomous agent loop)
+├── .gitignore                    # ignoring worktrees/ folder
+├── AGENTS.md                     # basic guidance for working in this environment
+├── README.md                     # this file
+├── justfile                      # our command runner
+├── opencode.json                 # barebone opencode configuration with trame.sh mcp
+└── prompt.md                     # a basic prompt.md used by our run-agent loop
 ```
 
 ## Prerequisites
@@ -63,49 +65,41 @@ Create a project on [trame.sh](https://trame.sh) or via the opencode CLI:
 echo "Create a new project called '<your-project>' with a description of what you're building" | opencode run
 ```
 
-### 4. Create Your First Worktree Environment
+### 4. Start the Coordinator
 
-Create an isolated environment for a feature:
+Launch an interactive shell for hands-on development:
 
 ```bash
-just start-env feature-auth
+just start-coord
 ```
 
-This command:
+This starts a Docker stack (opencode container + postgres) and drops you into a bash shell. From there you can run `just run-agent`, install dependencies, or work manually.
 
-1. Creates a new git branch called `feature-auth`
-2. Creates a worktree at `./worktrees/feature-auth/`
-3. Launches Docker containers (opencode, postgres) for this feature
-4. Sets up proper user permissions (uses your UID/GID)
-
-### 5. Work in the Worktree
-
-Navigate to the worktree:
+To stop the coordinator:
 
 ```bash
-cd worktrees/feature-auth
-just attach
+just stop-coord
 ```
 
-You can now:
+### 5. Start Autonomous Workers
 
-- Run the autonomous agent: `just run-agent`
-- Manually work on code
-- Install dependencies: `just install`
-- Run tests, build, etc.
-
-### 6. Stop the Environment
-
-From the worktree directory:
+Spin up N isolated workers that each claim and work on implementation plans automatically:
 
 ```bash
-just stop-env
+just start-agents 3
 ```
 
-This stops and removes the Docker containers. The worktree directory and your code remain intact.
+Each worker gets its own Docker stack (container + postgres). They auto-run the agent loop, claim plans from trame, create worktrees, and start implementing.
 
-### 7. Clean Up the Worktree
+View logs for a specific worker:
 
 ```bash
-just delete-env feature-auth
+just worker-logs 2
+just worker-logs 2 -f    # follow
+```
+
+To stop all workers:
+
+```bash
+just stop-agents 3
 ```

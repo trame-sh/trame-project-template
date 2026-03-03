@@ -1,0 +1,18 @@
+services:
+  opencode:
+    extends:
+      file: docker-compose.base.yml
+      service: opencode
+    restart: on-failure:3
+    command: ["just", "run-agent"]
+
+  postgres:
+    extends:
+      file: docker-compose.base.yml
+      service: postgres
+
+volumes:
+  postgres_test_data:
+    driver: local
+  agent_signals:
+    driver: local

@@ -2,10 +2,6 @@
 default:
     @just --list
 
-# Install all dependencies
-install:
-    pnpm install
-
 # Run autonomous agent
 run-agent:
   #!/usr/bin/env bash
@@ -23,29 +19,45 @@ run-agent:
     fi
   done
 
-# Create a worktree for a feature branch, and start a development environment for it
-start-env NAME="main":
+# Start the coordinator (interactive bash shell)
+start-coord:
   #!/usr/bin/env bash
   export LOCAL_UID=$(id -u)
   export LOCAL_GID=$(id -g)
-  if [[ {{NAME}} != "main" ]]; then
-    git worktree add --relative-paths -b {{NAME}} ./worktrees/{{NAME}}
-  fi
-  docker compose -p {{NAME}} -f docker-compose.env.yml up -d
+  docker compose -p coord -f denv/docker-compose.coord.yml up -d
+  docker compose -p coord -f denv/docker-compose.coord.yml exec opencode bash
 
-# Stop the development environment running in this worktree
-stop-env:
-  #!/usr/bin/env bash
-  ENV=$(git rev-parse --abbrev-ref HEAD)
-  docker compose -p $ENV down
+# Stop the coordinator
+stop-coord:
+  docker compose -p coord -f denv/docker-compose.coord.yml down
 
-delete-env NAME:
+# Start N autonomous worker agents (each in its own isolated stack)
+start-agents N="1":
   #!/usr/bin/env bash
-  docker compose -p {{NAME}} down
-  git worktree remove ./worktrees/{{NAME}}
+  export LOCAL_UID=$(id -u)
+  export LOCAL_GID=$(id -g)
+  for i in $(seq 1 {{N}}); do
+    echo "[start-agents] starting worker-$i"
+    docker compose -p "worker-$i" -f denv/docker-compose.worker.yml up -d
+  done
+  echo "[start-agents] started {{N}} worker(s)"
 
-# Attach to the opencode container
-attach:
+# Stop all worker agents
+stop-agents N="1":
   #!/usr/bin/env bash
-  ENV=$(git rev-parse --abbrev-ref HEAD)
-  docker compose -p $ENV attach opencode
+  for i in $(seq 1 {{N}}); do
+    echo "[stop-agents] stopping worker-$i"
+    docker compose -p "worker-$i" -f denv/docker-compose.worker.yml down
+  done
+  echo "[stop-agents] stopped {{N}} worker(s)"
+
+# Show logs for a specific worker
+worker-logs ID="1" FOLLOW="":
+  #!/usr/bin/env bash
+  FLAGS=""
+  if [ -n "{{FOLLOW}}" ]; then FLAGS="-f"; fi
+  docker compose -p "worker-{{ID}}" -f denv/docker-compose.worker.yml logs $FLAGS opencode
+
+# Build the denv-opencode image
+denv-build:
+  docker build {{justfile_dir()}}/denv
