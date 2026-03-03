@@ -24,8 +24,13 @@ stop-env:
   ENV=$(basename "$(git rev-parse --show-toplevel)")
   docker compose -p $ENV down
 
+delete-env NAME:
+  #!/usr/bin/env bash
+  docker compose -p $ENV down
+  git worktree remove ./worktrees/{{NAME}}
+
 # Attach to the opencode container
 attach:
   #!/usr/bin/env bash
   ENV=$(basename "$(git rev-parse --show-toplevel)")
-  docker compose -p $ENV attach opencode
+  docker compose -p $ENV exec -w /workspace/worktrees/$ENV opencode bash
