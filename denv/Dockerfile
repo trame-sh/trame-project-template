@@ -1,10 +1,11 @@
-FROM node:20-slim
+FROM node:23-slim
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
     PATH="/root/.cargo/bin:/root/.local/bin:${PATH}"
 
 # Install system dependencies + gosu for entrypoint user switching
+# node:23-slim is based on Debian Trixie which ships git >= 2.45 (needed for --relative-paths)
 RUN apt-get update && apt-get install -y \
     git \
     curl \
