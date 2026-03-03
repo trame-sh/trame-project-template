@@ -1,0 +1,1 @@
+- specs of project, features and implementation plans are available on trame mcp tool
