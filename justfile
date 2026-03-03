@@ -81,7 +81,10 @@ new-agent *args:
   last=$(docker compose ls --format json | grep -o "\"${prefix}-[0-9]*\"" | tr -d '"' | sed "s/${prefix}-//" | sort -n | tail -1)
   id=$((${last:-0} + 1))
   compose_project="${prefix}-${id}"
-  echo "[new-agent] starting $compose_project with model $MODEL (Ctrl-C to stop)"
+  # Generate stable agent identity for this container
+  export TRAME_AGENT_ID=$(uuidgen 2>/dev/null || cat /proc/sys/kernel/random/uuid)
+  export TRAME_AGENT_LABEL="worker-${id}"
+  echo "[new-agent] starting $compose_project with model $MODEL agent=$TRAME_AGENT_LABEL ($TRAME_AGENT_ID) (Ctrl-C to stop)"
   trap "echo '[new-agent] stopping $compose_project'; docker compose -p $compose_project -f denv/docker-compose.worker.yml down" EXIT
   docker compose -p "$compose_project" -f denv/docker-compose.worker.yml up -d --build
   docker compose -p "$compose_project" -f denv/docker-compose.worker.yml logs -f opencode
@@ -111,7 +114,10 @@ start-agents N="1" *args:
   prefix="{{project}}-worker"
   echo "[start-agents] starting {{N}} worker(s) with model $MODEL"
   for i in $(seq 1 {{N}}); do
-    echo "[start-agents] starting ${prefix}-$i"
+    # Generate unique agent identity per worker
+    export TRAME_AGENT_ID=$(uuidgen 2>/dev/null || cat /proc/sys/kernel/random/uuid)
+    export TRAME_AGENT_LABEL="worker-${i}"
+    echo "[start-agents] starting ${prefix}-$i agent=$TRAME_AGENT_LABEL ($TRAME_AGENT_ID)"
     docker compose -p "${prefix}-$i" -f denv/docker-compose.worker.yml up -d
   done
   echo "[start-agents] started {{N}} worker(s)"
