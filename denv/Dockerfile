@@ -1,62 +1,13 @@
-# [OPTIONAL: node] Base image — provides Node.js runtime and a 'node' user.
-# Swap to a different base if project doesn't use Node (update entrypoint.sh user accordingly).
-FROM node:25-trixie-slim
+# Project dev environment — extends trame-tools base image
+FROM ghcr.io/trame-sh/trame-tools:latest
 
-# [ADAPT] Environment variables — adjust PATH entries based on which optional layers you keep.
-ENV DEBIAN_FRONTEND=noninteractive \
-    PATH="/usr/local/cargo/bin:/usr/local/share/pnpm:/usr/local/bin:${PATH}" \
-    PNPM_HOME=/usr/local/share/pnpm \
-    RUSTUP_HOME=/usr/local/rustup \
-    CARGO_HOME=/usr/local/cargo
+# [OPTIONAL] pnpm package manager — uncomment if using Node.js
+# ENV PNPM_HOME=/usr/local/share/pnpm
+# ENV PATH="$PNPM_HOME:$PATH"
+# RUN curl -fsSL https://get.pnpm.io/install.sh | SHELL="$(which bash)" bash -
 
-# [REQUIRED] System dependencies + gosu for entrypoint user switching.
-# The git build deps (libcurl4-gnutls-dev, libexpat1-dev, etc.) are also required.
-RUN apt-get update && apt-get install -y \
-    curl \
-    wget \
-    gnupg \
-    ca-certificates \
-    python3 \
-    python3-pip \
-    build-essential \
-    gosu \
-    libcurl4-gnutls-dev \
-    libexpat1-dev \
-    gettext \
-    libz-dev \
-    libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# [REQUIRED] Git >= 2.48 from source — needed for --relative-paths worktree support.
-RUN cd /tmp \
-    && curl -sL https://github.com/git/git/archive/refs/tags/v2.48.1.tar.gz | tar xz \
-    && cd git-2.48.1 \
-    && make -j$(nproc) prefix=/usr all \
-    && make prefix=/usr install \
-    && cd / && rm -rf /tmp/git-2.48.1
-
-# [OPTIONAL: node] pnpm package manager — remove if not using Node.js.
-RUN curl -fsSL https://get.pnpm.io/install.sh | SHELL="$(which bash)" bash -
-
-# [REQUIRED] MCP server — provides shell_exec tool for Claude Code on the host.
-RUN npm install -g @modelcontextprotocol/sdk zod
-COPY mcp-server.mjs /usr/local/lib/mcp-server.mjs
-RUN printf '#!/bin/sh\nexec node /usr/local/lib/mcp-server.mjs "$@"\n' > /usr/local/bin/mcp-server \
-    && chmod +x /usr/local/bin/mcp-server
-
-# [OPTIONAL: rust] Rust toolchain — remove if project doesn't use Rust.
-RUN curl -sSf https://sh.rustup.rs --output rustup-init && \
-    sh rustup-init -y --default-toolchain stable && \
-    rm rustup-init && \
-    rustup component add rustfmt clippy
-
-# [REQUIRED] Entrypoint: maps container UID/GID to host user, then drops privileges.
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-# [REQUIRED] Working directory and volume.
-WORKDIR /workspace
-VOLUME /workspace
-
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["bash"]
+# [OPTIONAL] Rust toolchain — uncomment if using Rust
+# ENV RUSTUP_HOME=/usr/local/rustup CARGO_HOME=/usr/local/cargo
+# ENV PATH="/usr/local/cargo/bin:$PATH"
+# RUN curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable \
+#     && rustup component add rustfmt clippy
