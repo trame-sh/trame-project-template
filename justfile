@@ -16,16 +16,16 @@ start-env NAME:
   export LOCAL_UID=$(id -u)
   export LOCAL_GID=$(id -g)
   git worktree add -b {{NAME}} ./worktrees/{{NAME}}
-  docker compose -p {{NAME}} -f docker-compose.env.yml up -d
+  docker compose -p {{NAME}} -f denv/docker-compose.env.yml up -d
 
 # Stop the development environment running in this worktree
 stop-env:
   #!/usr/bin/env bash
   ENV=$(basename "$(git rev-parse --show-toplevel)")
-  docker compose -p $ENV -f docker-compose.env.yml down
+  docker compose -p $ENV down
 
 # Attach to the opencode container
 attach:
   #!/usr/bin/env bash
   ENV=$(basename "$(git rev-parse --show-toplevel)")
-  docker compose attach opencode
+  docker compose -p $ENV attach opencode
