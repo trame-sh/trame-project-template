@@ -25,7 +25,7 @@ start-coord:
   export LOCAL_UID=$(id -u)
   export LOCAL_GID=$(id -g)
   docker compose -p coord -f denv/docker-compose.coord.yml up -d
-  docker compose -p coord -f denv/docker-compose.coord.yml exec opencode bash
+  docker compose -p coord -f denv/docker-compose.coord.yml exec --user node opencode bash
 
 # Stop the coordinator
 stop-coord:
