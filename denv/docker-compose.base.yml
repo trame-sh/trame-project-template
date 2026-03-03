@@ -6,6 +6,7 @@ services:
       - LOCAL_GID=$LOCAL_GID
       - DATABASE_URL=postgresql://postgres:testpass@postgres:5432/trame_test
       - AGENT_SIGNALS_DIR=/tmp/agent-signals
+      - MODEL=${MODEL:-anthropic/claude-sonnet-4-5}
     volumes:
       - ../:/workspace
       - ~/.config/opencode:/home/node/.config/opencode
