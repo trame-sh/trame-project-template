@@ -1,6 +1,9 @@
 # Worktrees
 worktrees/
 
+# Environment (secrets)
+.env
+
 # Claude Code
 .claude/
 

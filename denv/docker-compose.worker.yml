@@ -6,10 +6,9 @@ services:
     command: ["bash", "/workspace/denv/agent-loop.sh"]
     environment:
       - MODEL
-      - AGENT_LABEL
-      - TRAME_AGENT_ID
+      - ROLE
+      - TRAME_API_KEY
     volumes:
-      - ~/.claude:/home/node/.claude
       - ~/.claude.json:/home/node/.claude.json
     restart: on-failure:3
 
