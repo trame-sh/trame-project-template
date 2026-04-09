@@ -8,6 +8,7 @@ services:
       - MODEL
       - ROLE
       - TRAME_API_KEY
+      - TRAME_PROJECT
     volumes:
       - ~/.claude.json:/home/node/.claude.json
     restart: on-failure:3
